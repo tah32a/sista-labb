@@ -1,8 +1,7 @@
-/// Represents a single measurement sample with timestamp and angles from both algorithms
 class MeasurementData {
   final DateTime timestamp;
-  final double algorithm1Angle; // Acceleration-based with EWMA filter
-  final double algorithm2Angle; // Sensor fusion with complementary filter
+  final double algorithm1Angle;
+  final double algorithm2Angle;
 
   MeasurementData({
     required this.timestamp,
@@ -10,12 +9,10 @@ class MeasurementData {
     required this.algorithm2Angle,
   });
 
-  /// Convert to CSV row format
   String toCsvRow() {
     return '${timestamp.millisecondsSinceEpoch},$algorithm1Angle,$algorithm2Angle';
   }
 
-  /// CSV header for export
   static String csvHeader() {
     return 'timestamp,alg1_angle,alg2_angle';
   }

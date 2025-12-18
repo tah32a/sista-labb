@@ -2,12 +2,10 @@ import 'dart:async';
 import 'package:sensors_plus/sensors_plus.dart';
 import '../models/sensor_reading.dart';
 
-/// Service responsible for acquiring sensor data from accelerometer and gyroscope
 class SensorService {
   StreamSubscription<UserAccelerometerEvent>? _accelSubscription;
   StreamSubscription<GyroscopeEvent>? _gyroSubscription;
 
-  // Latest sensor values
   double _accelX = 0.0;
   double _accelY = 0.0;
   double _accelZ = 0.0;
@@ -18,12 +16,9 @@ class SensorService {
   final StreamController<SensorReading> _sensorStreamController =
       StreamController<SensorReading>.broadcast();
 
-  /// Stream of combined sensor readings
   Stream<SensorReading> get sensorStream => _sensorStreamController.stream;
 
-  /// Start listening to accelerometer and gyroscope sensors
   void startListening() {
-    // Listen to linear accelerometer (if available, otherwise use regular accelerometer)
     _accelSubscription = userAccelerometerEventStream().listen((event) {
       _accelX = event.x;
       _accelY = event.y;
@@ -31,7 +26,6 @@ class SensorService {
       _emitCombinedReading();
     });
 
-    // Listen to gyroscope
     _gyroSubscription = gyroscopeEventStream().listen((event) {
       _gyroX = event.x;
       _gyroY = event.y;
@@ -40,7 +34,6 @@ class SensorService {
     });
   }
 
-  /// Emit combined sensor reading
   void _emitCombinedReading() {
     _sensorStreamController.add(SensorReading(
       timestamp: DateTime.now(),
@@ -53,13 +46,11 @@ class SensorService {
     ));
   }
 
-  /// Stop listening to sensors
   void stopListening() {
     _accelSubscription?.cancel();
     _gyroSubscription?.cancel();
   }
 
-  /// Dispose resources
   void dispose() {
     stopListening();
     _sensorStreamController.close();

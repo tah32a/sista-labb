@@ -1,4 +1,3 @@
-/// Represents raw sensor data from accelerometer and gyroscope
 class SensorReading {
   final DateTime timestamp;
   final double accelX;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../viewmodels/measurement_viewmodel.dart';
 import '../widgets/measurement_chart.dart';
 
-/// Home screen with measurement controls and live/historical graph display
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,26 +15,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel.addListener(_onViewModelChanged);
+    _viewModel.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _viewModel.removeListener(_onViewModelChanged);
     _viewModel.dispose();
     super.dispose();
   }
 
-  void _onViewModelChanged() {
-    setState(() {}); // Rebuild UI when ViewModel changes
-  }
-
-  void _startMeasurement() {
-    _viewModel.startMeasurement();
-  }
-
-  void _stopMeasurement() {
-    _viewModel.stopMeasurement();
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
+    );
   }
 
   Future<void> _exportData() async {
@@ -46,19 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final filePath = await _viewModel.exportData();
     if (filePath != null) {
-      _showMessage('Data exported to:\n$filePath');
+      _showMessage('Exported to:\n$filePath');
     } else {
       _showMessage('Export failed');
     }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-      ),
-    );
   }
 
   @override
@@ -71,12 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Control buttons
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Status indicator
                   Container(
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
@@ -92,7 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           _viewModel.isRecording
                               ? Icons.fiber_manual_record
                               : Icons.stop_circle_outlined,
-                          color: _viewModel.isRecording ? Colors.red : Colors.grey,
+                          color:
+                              _viewModel.isRecording ? Colors.red : Colors.grey,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -106,14 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Button row
                   Row(
                     children: [
-                      // Start button
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _viewModel.isRecording ? null : _startMeasurement,
+                          onPressed: _viewModel.isRecording
+                              ? null
+                              : _viewModel.startMeasurement,
                           icon: const Icon(Icons.play_arrow),
                           label: const Text('Start'),
                           style: ElevatedButton.styleFrom(
@@ -124,11 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-
-                      // Stop button
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _viewModel.isRecording ? _stopMeasurement : null,
+                          onPressed: _viewModel.isRecording
+                              ? _viewModel.stopMeasurement
+                              : null,
                           icon: const Icon(Icons.stop),
                           label: const Text('Stop'),
                           style: ElevatedButton.styleFrom(
@@ -139,8 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-
-                      // Export button
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: _viewModel.hasData ? _exportData : null,
@@ -158,8 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
-            // Chart display
             Expanded(
               child: _viewModel.hasData
                   ? MeasurementChart(measurements: _viewModel.measurements)
@@ -192,8 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
             ),
-
-            // Data info
             if (_viewModel.hasData)
               Container(
                 padding: const EdgeInsets.all(16.0),
@@ -259,11 +234,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _getDuration() {
     if (_viewModel.measurements.isEmpty) return '-';
-    
+
     final first = _viewModel.measurements.first.timestamp;
     final last = _viewModel.measurements.last.timestamp;
     final duration = last.difference(first).inSeconds;
-    
+
     return '${duration}s';
   }
 }
